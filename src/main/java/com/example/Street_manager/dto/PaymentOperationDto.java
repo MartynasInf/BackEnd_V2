@@ -1,0 +1,29 @@
+package com.example.Street_manager.dto;
+
+
+import com.example.Street_manager.enums.PaymentOperationStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class PaymentOperationDto {
+
+    private Long id;
+    private String purpose;
+    private LocalDate dueDate;
+    private Double totalSum;
+    private PaymentOperationStatus operationStatus;
+
+    private List<HousePaymentDto> housePayments;
+
+    private List<Integer> houseIds;
+
+}
