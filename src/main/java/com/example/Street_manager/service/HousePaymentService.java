@@ -24,11 +24,12 @@ public class HousePaymentService implements DataChecker<HousePayment> {
     private final HouseRepository houseRepository;
     private final PaymentOperationRepository paymentOperationRepository;
 
-    public void payThePayment(HousePaymentDto housePaymentDto) {
+    public void pay(HousePaymentDto housePaymentDto) {
         try {
-            HousePayment housePayment = housePaymentRepository.findById(housePaymentDto.getId()).orElseThrow(() -> ResponseException.builder()
-                    .message("Your selected house payment does not exist")
-                    .build());
+            HousePayment housePayment = housePaymentRepository.findById(housePaymentDto.getId())
+                    .orElseThrow(() -> ResponseException.builder()
+                            .message("Your selected house payment does not exist")
+                            .build());
             housePayment.setIsPaid(true);
             housePaymentRepository.save(housePayment);
         } catch (Exception e) {
@@ -53,9 +54,8 @@ public class HousePaymentService implements DataChecker<HousePayment> {
     }
 
     public Double calculateHousePayment(PaymentOperationDto paymentRequest) {
-        return (BigDecimal.valueOf(paymentRequest.getTotalSum() / paymentRequest.getHouseIds().size())
-                .setScale(2, RoundingMode.UP))
-                .doubleValue();
+        Double paymentSizeForHouse = paymentRequest.getTotalSum() / paymentRequest.getHouseIds().size();
+        return BigDecimal.valueOf(paymentSizeForHouse).setScale(2, RoundingMode.UP).doubleValue();
     }
 
     @Override

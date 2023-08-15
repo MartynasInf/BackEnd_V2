@@ -7,15 +7,17 @@ import com.example.Street_manager.dto.UserDetailsDto;
 import com.example.Street_manager.Interface.DataChecker;
 import com.example.Street_manager.enums.PaymentOperationStatus;
 import com.example.Street_manager.exception.ResponseException;
+import com.example.Street_manager.model.House;
 import com.example.Street_manager.model.HousePayment;
 import com.example.Street_manager.model.PaymentOperation;
+import com.example.Street_manager.model.User;
 import com.example.Street_manager.repository.PaymentOperationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,17 +32,17 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         return mapToPaymentOperationDto(payments);
     }
 
-    public void createNewPaymentOperation(PaymentOperationDto paymentOperationDto) {
+    public PaymentOperation createNewPaymentOperation(PaymentOperationDto paymentOperationDto) {
         try {
             PaymentOperation newPayment = PaymentOperation.builder()
                     .purpose(paymentOperationDto.getPurpose())
                     .dueDate(paymentOperationDto.getDueDate())
                     .totalSum(paymentOperationDto.getTotalSum())
-                    .operationStatus(PaymentOperationStatus.CREATION)
+                    .operationStatus(PaymentOperationStatus.CREATED)
                     .build();
             newPayment = paymentOperationRepository.save(newPayment);
             newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
-            paymentOperationRepository.save(newPayment);
+            return paymentOperationRepository.save(newPayment);
         } catch (Exception e) {
             throw ResponseException.builder()
                     .message(e.getMessage())
@@ -74,20 +76,21 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
     }
 
     private List<PaymentOperationDto> mapToPaymentOperationDto(List<PaymentOperation> payments) {
+        return payments.stream()
+                .map(this::mapToPaymentOperationDto)
+                .collect(Collectors.toList());
+    }
+
+    private PaymentOperationDto mapToPaymentOperationDto(PaymentOperation payment) {
         try {
-            List<PaymentOperationDto> paymentOperationsDto = new ArrayList<>();
-            for (PaymentOperation payment : payments) {
-                PaymentOperationDto paymentOperationDto = PaymentOperationDto.builder()
-                        .id(payment.getId())
-                        .purpose(payment.getPurpose())
-                        .dueDate(payment.getDueDate())
-                        .totalSum(payment.getTotalSum())
-                        .operationStatus(payment.getOperationStatus())
-                        .housePayments(mapToHousePaymentDto(payment))
-                        .build();
-                paymentOperationsDto.add(paymentOperationDto);
-            }
-            return paymentOperationsDto;
+            return PaymentOperationDto.builder()
+                    .id(payment.getId())
+                    .purpose(payment.getPurpose())
+                    .dueDate(payment.getDueDate())
+                    .totalSum(payment.getTotalSum())
+                    .operationStatus(payment.getOperationStatus())
+                    .housePayments(mapToHousePaymentDto(payment))
+                    .build();
         } catch (Exception e) {
             throw ResponseException.builder()
                     .message(e.getMessage())
@@ -96,36 +99,18 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
     }
 
     private List<HousePaymentDto> mapToHousePaymentDto(PaymentOperation payment) {
-        try {
-            List<HousePaymentDto> housePaymentsDto = new ArrayList<>();
-            for (HousePayment housePayment : payment.getHousePayments()) {
-                HousePaymentDto housePaymentDto = HousePaymentDto.builder()
-                        .id(housePayment.getId())
-                        .amount(housePayment.getAmount())
-                        .isPaid(housePayment.getIsPaid())
-                        .house(mapToHouseDto(housePayment))
-                        .build();
-                housePaymentsDto.add(housePaymentDto);
-            }
-            return housePaymentsDto;
-        } catch (Exception e) {
-            throw ResponseException.builder()
-                    .message(e.getMessage())
-                    .build();
-        }
+        return payment.getHousePayments().stream()
+                .map(this::mapToHousePaymentDto)
+                .collect(Collectors.toList());
     }
 
-    private UserDetailsDto mapToUserDetailsDto(HousePayment housePayment) {
+    private HousePaymentDto mapToHousePaymentDto(HousePayment housePayment) {
         try {
-            return UserDetailsDto.builder()
-                    .id(housePayment.getHouse().getUser().getId())
-                    .firstName(housePayment.getHouse().getUser().getFirstName())
-                    .lastName(housePayment.getHouse().getUser().getLastName())
-                    .email(housePayment.getHouse().getUser().getEmail())
-                    .house(housePayment.getHouse().getId())
-                    .phoneNumber(housePayment.getHouse().getUser().getPhoneNumber())
-                    .bankAccount(housePayment.getHouse().getUser().getBankAccount())
-                    .enabled(housePayment.getHouse().getUser().isEnabled())
+            return HousePaymentDto.builder()
+                    .id(housePayment.getId())
+                    .amount(housePayment.getAmount())
+                    .isPaid(housePayment.getIsPaid())
+                    .house(mapToHouseDto(housePayment.getHouse()))
                     .build();
         } catch (Exception e) {
             throw ResponseException.builder()
@@ -134,13 +119,13 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         }
     }
 
-    private HouseDto mapToHouseDto(HousePayment housePayment) {
+    private HouseDto mapToHouseDto(House house) {
         try {
             return HouseDto.builder()
-                    .id(housePayment.getHouse().getId())
-                    .houseNumber(housePayment.getHouse().getHouseNumber())
-                    .streetName(housePayment.getHouse().getStreetName())
-                    .user(mapToUserDetailsDto(housePayment))
+                    .id(house.getId())
+                    .houseNumber(house.getHouseNumber())
+                    .streetName(house.getStreetName())
+                    .user(mapToUserDetailsDto(house, house.getUser()))
                     .build();
         } catch (Exception e) {
             throw ResponseException.builder()
@@ -148,6 +133,26 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .build();
         }
     }
+
+    private UserDetailsDto mapToUserDetailsDto(House house, User user) {
+        try {
+            return UserDetailsDto.builder()
+                    .id(house.getUser().getId())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .house(house.getId())
+                    .phoneNumber(user.getPhoneNumber())
+                    .bankAccount(user.getBankAccount())
+                    .enabled(user.isEnabled())
+                    .build();
+        } catch (Exception e) {
+            throw ResponseException.builder()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
 
     public void validateIfHousesAreSelected(PaymentOperationDto paymentOperationDto) {
         if (paymentOperationDto.getHouseIds() == null || paymentOperationDto.getHouseIds().size() < 1) {
@@ -166,22 +171,23 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
     }
 
     public void validatesSelectedHousesIsWithOwners(Long selectedHouseId) {
-        if (!houseService.checkIfHouseHasOwner(selectedHouseId)) {
+        if (!houseService.isHouseOwnerPresent(selectedHouseId)) {
             throw ResponseException.builder()
                     .message("Your selected house with ID " + (selectedHouseId) + " does not has an owner and cannot be added to the payment operation")
                     .build();
         }
     }
 
-    public void validatePaymentOperationTotalSum(PaymentOperationDto paymentOperationDto){
-        if(paymentOperationDto.getTotalSum() == null || paymentOperationDto.getTotalSum() == 0) {
+    public void validatePaymentOperationTotalSum(PaymentOperationDto paymentOperationDto) {
+        if (paymentOperationDto.getTotalSum() == null || paymentOperationDto.getTotalSum() == 0) {
             throw ResponseException.builder()
                     .message("Your total sum of the payment operation cannot be null or 0")
                     .build();
         }
     }
-    public void validatePaymentOperationDueDate(PaymentOperationDto paymentOperationDto){
-        if (paymentOperationDto.getDueDate() == null || paymentOperationDto.getDueDate().isBefore(LocalDate.now())){
+
+    public void validatePaymentOperationDueDate(PaymentOperationDto paymentOperationDto) {
+        if (paymentOperationDto.getDueDate() == null || paymentOperationDto.getDueDate().isBefore(LocalDate.now())) {
             throw ResponseException.builder()
                     .message("Given due date is null or less than todays date")
                     .build();

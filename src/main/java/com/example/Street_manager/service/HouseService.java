@@ -6,13 +6,14 @@ import com.example.Street_manager.Interface.DataChecker;
 import com.example.Street_manager.exception.ResponseException;
 import com.example.Street_manager.model.House;
 
+import com.example.Street_manager.model.User;
 import com.example.Street_manager.repository.HouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class HouseService implements DataChecker<House> {
     private final HouseRepository houseRepository;
 
     public List<HouseDto> findAll() {
-        List<HouseDto> houses = mapToHouseDto();
+        List<HouseDto> houses = mapToHousesDto();
         if (houses.isEmpty()) {
             throw ResponseException.builder()
                     .message("Houses was not found")
@@ -30,31 +31,31 @@ public class HouseService implements DataChecker<House> {
         return houses;
     }
 
-    private List<HouseDto> mapToHouseDto() {
-        List<HouseDto> housesDto = new ArrayList<>();
-        List<House> houses = houseRepository.findAll();
-        for (House house : houses) {
-            HouseDto houseDto = HouseDto.builder()
-                    .id(house.getId())
-                    .houseNumber(house.getHouseNumber())
-                    .streetName(house.getStreetName())
-                    .user(mapToUserDetails(house))
-                    .build();
-            housesDto.add(houseDto);
-        }
-        return housesDto;
+    private List<HouseDto> mapToHousesDto() {
+        return houseRepository.findAll().stream()
+                .map(this::mapHouseToDto)
+                .collect(Collectors.toList());
     }
 
-    private UserDetailsDto mapToUserDetails(House house) {
+    private HouseDto mapHouseToDto(House house) {
+        return HouseDto.builder()
+                .id(house.getId())
+                .houseNumber(house.getHouseNumber())
+                .streetName(house.getStreetName())
+                .user(mapToUserDetails(house.getUser()))
+                .build();
+    }
+
+    private UserDetailsDto mapToUserDetails(User user) {
         UserDetailsDto userDetailsDto = new UserDetailsDto();
-        if (house.getUser() != null) {
-            userDetailsDto.setId(house.getUser().getId());
-            userDetailsDto.setFirstName(house.getUser().getFirstName());
-            userDetailsDto.setLastName(house.getUser().getLastName());
-            userDetailsDto.setEmail(house.getUser().getEmail());
-            userDetailsDto.setPhoneNumber(house.getUser().getPhoneNumber());
-            userDetailsDto.setBankAccount(house.getUser().getBankAccount());
-            userDetailsDto.setEnabled(house.getUser().getEnabled());
+        if (user != null) {
+            userDetailsDto.setId(user.getId());
+            userDetailsDto.setFirstName(user.getFirstName());
+            userDetailsDto.setLastName(user.getLastName());
+            userDetailsDto.setEmail(user.getEmail());
+            userDetailsDto.setPhoneNumber(user.getPhoneNumber());
+            userDetailsDto.setBankAccount(user.getBankAccount());
+            userDetailsDto.setEnabled(user.getEnabled());
         }
         return userDetailsDto;
     }
@@ -77,20 +78,21 @@ public class HouseService implements DataChecker<House> {
     }
 
     public void delete(Long houseId) {
-        if (!checkIfHouseHasOwner(houseId)) {
-            houseRepository.deleteById(houseId);
-        } else {
+        if (isHouseOwnerPresent(houseId)) {
             throw ResponseException.builder()
                     .message("House with owner cannot be deleted. " +
                             "Please remove owner from house before delete.")
                     .build();
+        } else {
+            houseRepository.deleteById(houseId);
         }
     }
 
-    public Boolean checkIfHouseHasOwner(Long id) {
-        House house = houseRepository.findById(id).orElseThrow(() -> ResponseException.builder()
-                .message("House Id is non existent")
-                .build());
+    public Boolean isHouseOwnerPresent(Long id) {
+        House house = houseRepository.findById(id)
+                .orElseThrow(() -> ResponseException.builder()
+                        .message("House Id is non existent")
+                        .build());
         return house.getUser() != null;
     }
 

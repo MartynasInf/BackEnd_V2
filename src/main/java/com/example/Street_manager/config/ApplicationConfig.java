@@ -50,6 +50,8 @@ public class ApplicationConfig {
                     .password(new BCryptPasswordEncoder().encode("martynas"))
                     .lastName("Jokubauskis")
                     .firstName("Martynas")
+                    .phoneNumber("+370 88666999")
+                    .bankAccount("LT123456789")
                     .role(Role.ADMIN)
                     .enabled(true)
                     .house(house1)
@@ -61,6 +63,8 @@ public class ApplicationConfig {
                     .password(new BCryptPasswordEncoder().encode("testas"))
                     .lastName("Testas")
                     .firstName("Testauskas")
+                    .phoneNumber("+370 6655443322")
+                    .bankAccount("LT1223344556")
                     .enabled(true)
                     .role(Role.USER)
                     .house(house2)
@@ -68,15 +72,15 @@ public class ApplicationConfig {
 
             PaymentOperation paymentRequest1 = PaymentOperation.builder()
                     .purpose("For water supply 2023-06")
-                    .dueDate(LocalDate.of(2023, 6, 30))
+                    .dueDate(LocalDate.of(2023, 12, 30))
                     .totalSum(47.80)
-                    .operationStatus(PaymentOperationStatus.CREATION)
+                    .operationStatus(PaymentOperationStatus.CREATED)
                     .build();
             PaymentOperation paymentRequest2 = PaymentOperation.builder()
                     .purpose("For road works 2023-06")
-                    .dueDate(LocalDate.of(2023, 6, 30))
+                    .dueDate(LocalDate.of(2023, 11, 30))
                     .totalSum(80.0)
-                    .operationStatus(PaymentOperationStatus.CREATION)
+                    .operationStatus(PaymentOperationStatus.CREATED)
                     .build();
 
             HousePayment housePayment1 = HousePayment.builder()

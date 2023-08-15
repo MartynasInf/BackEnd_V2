@@ -1,21 +1,25 @@
 package com.example.Street_manager.controller;
 
-
 import com.example.Street_manager.dto.PaymentOperationDto;
 import com.example.Street_manager.exception.ResponseException;
+import com.example.Street_manager.model.PaymentOperation;
 import com.example.Street_manager.service.HouseService;
 import com.example.Street_manager.service.PaymentOperationService;
 import lombok.RequiredArgsConstructor;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
 @RequestMapping("/authorised/payments")
 @RequiredArgsConstructor
 public class PaymentOperationController {
-
+    private final Logger logger = LogManager.getLogger(PaymentOperationController.class);
     private final PaymentOperationService paymentOperationService;
     private final HouseService houseService;
 
@@ -23,8 +27,11 @@ public class PaymentOperationController {
     @CrossOrigin(origins = "http://localhost:4200/")
     public ResponseEntity<?> findAll() {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(paymentOperationService.getAll());
+            List<PaymentOperationDto> paymentOperations = paymentOperationService.getAll();
+            logger.info("Payment operations has been retrieved successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(paymentOperations);
         } catch (Exception e) {
+            logger.error("An error has occurred while retrieving payment operations. " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -33,14 +40,17 @@ public class PaymentOperationController {
     @CrossOrigin(origins = "http://localhost:4200/")
     public ResponseEntity<?> createNewPaymentOperation(@RequestBody PaymentOperationDto paymentOperationDto) {
         try {
+            logger.info("Creating new payment operation");
             paymentOperationService.validateIfHousesAreSelected(paymentOperationDto);
             paymentOperationDto.getHouseIds().forEach(id -> houseService.checkIfIdExists(id.longValue()));
             paymentOperationDto.getHouseIds().forEach(id -> paymentOperationService.validatesSelectedHousesIsWithOwners(id.longValue()));
             paymentOperationService.validatePaymentOperationTotalSum(paymentOperationDto);
             paymentOperationService.validatePaymentOperationDueDate(paymentOperationDto);
-            paymentOperationService.createNewPaymentOperation(paymentOperationDto);
+            PaymentOperation paymentOperation = paymentOperationService.createNewPaymentOperation(paymentOperationDto);
+            logger.info("Payment operation has been created successfully. Operation ID = " + paymentOperation.getId());
             return ResponseEntity.status(HttpStatus.OK).body("Payment operation has been created successfully");
         } catch (ResponseException e) {
+            logger.error("An error occurred while creating new payment operation. " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -49,10 +59,14 @@ public class PaymentOperationController {
     @CrossOrigin(origins = "http://localhost:4200/")
     public ResponseEntity<?> deletePaymentOperation(@PathVariable Long paymentId) {
         try {
+            logger.info("Deleting payment operation ID = " + paymentId);
             paymentOperationService.checkIfIdExists(paymentId);
             paymentOperationService.deletePaymentOperation(paymentId);
-            return ResponseEntity.status(HttpStatus.OK).body("Payment operation deleted successfully");
+            logger.info("Payment operation with ID " + paymentId + " was deleted successfully");
+            return ResponseEntity.status(HttpStatus.OK).body("Payment operation was deleted successfully");
         } catch (ResponseException e) {
+            logger.error("An error occurred while deleting payment operation with ID = "
+                    + paymentId + ". " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -61,12 +75,18 @@ public class PaymentOperationController {
     @CrossOrigin(origins = "http://localhost:4200/")
     public ResponseEntity<?> changePaymentOperationStatus(@RequestBody PaymentOperationDto paymentRequest) {
         try {
+            logger.info("Changing payment operation status");
             paymentOperationService.validatePaymentOperationId(paymentRequest);
             paymentOperationService.changePaymentOperationStatus(paymentRequest);
+            logger.info("Payment operation status has been changed successfully. Payment operation ID = " + paymentRequest.getId());
             return ResponseEntity.status(HttpStatus.OK).body("Operation status has been changed successfully");
         } catch (ResponseException e) {
+            logger.error("An error occurred while changing payment operation status for payment operation ID = "
+                    + paymentRequest.getId() + ". " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            logger.error("An unexpected error occurred while changing payment operation status for payment operation ID = "
+                    + paymentRequest.getId() + ". " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

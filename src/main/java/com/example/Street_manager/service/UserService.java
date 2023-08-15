@@ -18,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService implements DataChecker<User> {
 
-    //CThis is for testing purposes
-
     private final UserRepository userRepository;
     private final HouseRepository houseRepository;
     private final HouseService houseService;
@@ -128,7 +126,7 @@ public class UserService implements DataChecker<User> {
     }
 
     public void validateHouseInUserDetailsIsFreeToUse(UserDetailsDto request) {
-        if (houseService.checkIfHouseHasOwner(request.getHouse())) {
+        if (houseService.isHouseOwnerPresent(request.getHouse())) {
             throw ResponseException.builder()
                     .message("House already has an owner and cannot be assigned to another user")
                     .build();

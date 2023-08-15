@@ -81,6 +81,11 @@
 			<version>5.4.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.2.0.Final</version> <!-- Use the latest version -->
+		</dependency>
 	</dependencies>
 
 	<build>

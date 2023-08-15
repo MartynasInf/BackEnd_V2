@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 @Builder
-public class ResponseException extends RuntimeException{
-
+public class ResponseException extends RuntimeException {
     private final String message;
     private final String systemMessage;
 }

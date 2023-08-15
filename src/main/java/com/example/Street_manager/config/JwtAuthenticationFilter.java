@@ -27,23 +27,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        //iš requesto istraukiam header' (nurodom headerName); -bearer token
+        //Pulling header from request' (given headerName); -bearer token
         final String authHeader = request.getHeader("Authorization");
-         final String jwt;
+        final String jwt;
         final String userEmail;
-        //patikrinam ar pries tai nebuvo autentifikuotas
+        //Checking if it's been authenticated before
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7); //Nuo 7 nes B-E-A-R-E-A-R
+        jwt = authHeader.substring(7); //Checking from 7th char as it is B-E-A-R-E-A-R at start
         userEmail = jwtService.extractUsername(jwt); //extract the userEmail from JWT token
-
-
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                //sito reikia, update spring security context
+                //update spring security context
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
