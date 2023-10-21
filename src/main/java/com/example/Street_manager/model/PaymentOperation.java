@@ -40,6 +40,11 @@ public class PaymentOperation {
     private Double totalSum;
     @NotNull
     private PaymentOperationStatus operationStatus;
+    @NotNull
+    private String creator;
+    @NotNull
+    private LocalDate creationDate;
+
 
     @OneToMany(mappedBy = "paymentRequest", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private List<HousePayment> housePayments;

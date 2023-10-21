@@ -76,7 +76,7 @@ public class PaymentOperationController {
     public ResponseEntity<?> changePaymentOperationStatus(@RequestBody PaymentOperationDto paymentRequest) {
         try {
             logger.info("Changing payment operation status");
-            paymentOperationService.validatePaymentOperationId(paymentRequest);
+            paymentOperationService.validatePaymentOperationId(paymentRequest.getId());
             paymentOperationService.changePaymentOperationStatus(paymentRequest);
             logger.info("Payment operation status has been changed successfully. Payment operation ID = " + paymentRequest.getId());
             return ResponseEntity.status(HttpStatus.OK).body("Operation status has been changed successfully");
@@ -88,6 +88,22 @@ public class PaymentOperationController {
             logger.error("An unexpected error occurred while changing payment operation status for payment operation ID = "
                     + paymentRequest.getId() + ". " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/updatePaymentOperationDetails")
+    @CrossOrigin(origins = "http://localhost:4200/")
+    public ResponseEntity<?> updatePaymentOperation(@RequestBody PaymentOperationDto paymentOperationDto){
+        try {
+            logger.info("Changing payment operation details");
+            paymentOperationService.validatePaymentOperationId(paymentOperationDto.getId());
+            paymentOperationService.checkIfIdExists(paymentOperationDto.getId());
+            paymentOperationService.changePaymentOperationDetails(paymentOperationDto);
+            return ResponseEntity.status(HttpStatus.OK).body("Payment operation details was updated successfully");
+        } catch (ResponseException e){
+            logger.error("An error occurred while updating payment operation for payment operation ID = "
+                    + paymentOperationDto.getId() + ". " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
