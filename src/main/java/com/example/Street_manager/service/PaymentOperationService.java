@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,9 +41,17 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .dueDate(paymentOperationDto.getDueDate())
                     .totalSum(paymentOperationDto.getTotalSum())
                     .operationStatus(PaymentOperationStatus.CREATED)
+                    .creator(paymentOperationDto.getCreator())
+                    .creationDate(LocalDate.now())
                     .build();
-            newPayment = paymentOperationRepository.save(newPayment);
-            newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            if (paymentOperationDto.getId() == null) {
+                newPayment = paymentOperationRepository.save(newPayment);
+                newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            } else {
+                newPayment.setId(paymentOperationDto.getId());
+                housePaymentService.clearHousePayments(paymentOperationDto.getId());
+                newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            }
             return paymentOperationRepository.save(newPayment);
         } catch (Exception e) {
             throw ResponseException.builder()
@@ -75,6 +85,16 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         }
     }
 
+    public void changePaymentOperationDetails(PaymentOperationDto paymentOperationDto) {
+        PaymentOperation updatedPaymentOperation = PaymentOperation.builder()
+                .id(paymentOperationDto.getId())
+                .purpose(paymentOperationDto.getPurpose())
+                .dueDate(paymentOperationDto.getDueDate())
+                .totalSum(paymentOperationDto.getTotalSum())
+                .build();
+        updatedPaymentOperation.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, paymentOperationDto.getId()));
+    }
+
     private List<PaymentOperationDto> mapToPaymentOperationDto(List<PaymentOperation> payments) {
         return payments.stream()
                 .map(this::mapToPaymentOperationDto)
@@ -90,6 +110,8 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .totalSum(payment.getTotalSum())
                     .operationStatus(payment.getOperationStatus())
                     .housePayments(mapToHousePaymentDto(payment))
+                    .creator(payment.getCreator())
+                    .creationDate(payment.getCreationDate())
                     .build();
         } catch (Exception e) {
             throw ResponseException.builder()
@@ -153,7 +175,6 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         }
     }
 
-
     public void validateIfHousesAreSelected(PaymentOperationDto paymentOperationDto) {
         if (paymentOperationDto.getHouseIds() == null || paymentOperationDto.getHouseIds().size() < 1) {
             throw ResponseException.builder()
@@ -162,8 +183,8 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         }
     }
 
-    public void validatePaymentOperationId(PaymentOperationDto paymentOperationDto) {
-        if (paymentOperationDto.getId() == null) {
+    public void validatePaymentOperationId(Long paymentOperationDtoId) {
+        if (paymentOperationDtoId == null) {
             throw ResponseException.builder()
                     .message("Payment operation id is null")
                     .build();
@@ -193,7 +214,6 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .build();
         }
     }
-
 
     @Override
     public Boolean checkIfIdExists(Long id) {

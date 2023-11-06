@@ -75,12 +75,16 @@ public class ApplicationConfig {
                     .dueDate(LocalDate.of(2023, 12, 30))
                     .totalSum(47.80)
                     .operationStatus(PaymentOperationStatus.CREATED)
+                    .creator("Martynas Jokubauskis")
+                    .creationDate(LocalDate.of(2023, 10, 10))
                     .build();
             PaymentOperation paymentRequest2 = PaymentOperation.builder()
                     .purpose("For road works 2023-06")
                     .dueDate(LocalDate.of(2023, 11, 30))
                     .totalSum(80.0)
                     .operationStatus(PaymentOperationStatus.CREATED)
+                    .creator("Testas Testauskas")
+                    .creationDate(LocalDate.of(2023, 10, 16))
                     .build();
 
             HousePayment housePayment1 = HousePayment.builder()

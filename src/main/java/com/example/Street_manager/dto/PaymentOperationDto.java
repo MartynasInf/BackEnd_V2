@@ -21,6 +21,8 @@ public class PaymentOperationDto {
     private LocalDate dueDate;
     private Double totalSum;
     private PaymentOperationStatus operationStatus;
+    private String creator;
+    private LocalDate creationDate;
 
     private List<HousePaymentDto> housePayments;
 
