@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,8 +44,14 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .creator(paymentOperationDto.getCreator())
                     .creationDate(LocalDate.now())
                     .build();
-            newPayment = paymentOperationRepository.save(newPayment);
-            newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            if (paymentOperationDto.getId() == null) {
+                newPayment = paymentOperationRepository.save(newPayment);
+                newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            } else {
+                newPayment.setId(paymentOperationDto.getId());
+                housePaymentService.clearHousePayments(paymentOperationDto.getId());
+                newPayment.setHousePayments(housePaymentService.createHousePayments(paymentOperationDto, newPayment.getId()));
+            }
             return paymentOperationRepository.save(newPayment);
         } catch (Exception e) {
             throw ResponseException.builder()
@@ -77,7 +85,7 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
         }
     }
 
-    public void changePaymentOperationDetails(PaymentOperationDto paymentOperationDto){
+    public void changePaymentOperationDetails(PaymentOperationDto paymentOperationDto) {
         PaymentOperation updatedPaymentOperation = PaymentOperation.builder()
                 .id(paymentOperationDto.getId())
                 .purpose(paymentOperationDto.getPurpose())
@@ -206,7 +214,6 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .build();
         }
     }
-
 
     @Override
     public Boolean checkIfIdExists(Long id) {

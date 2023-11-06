@@ -40,6 +40,7 @@ public class PaymentOperationController {
     @CrossOrigin(origins = "http://localhost:4200/")
     public ResponseEntity<?> createNewPaymentOperation(@RequestBody PaymentOperationDto paymentOperationDto) {
         try {
+            System.out.println(paymentOperationDto);
             logger.info("Creating new payment operation");
             paymentOperationService.validateIfHousesAreSelected(paymentOperationDto);
             paymentOperationDto.getHouseIds().forEach(id -> houseService.checkIfIdExists(id.longValue()));

@@ -58,6 +58,13 @@ public class HousePaymentService implements DataChecker<HousePayment> {
         return BigDecimal.valueOf(paymentSizeForHouse).setScale(2, RoundingMode.UP).doubleValue();
     }
 
+    public void clearHousePayments(Long paymentOperationId) {
+        List<HousePayment> existingHousePayments = housePaymentRepository.findByPaymentRequest_Id(paymentOperationId);
+        for (HousePayment housePayment : existingHousePayments) {
+            housePaymentRepository.delete(housePayment);
+        }
+    }
+
     @Override
     public Boolean checkIfIdExists(Long id) {
         if (housePaymentRepository.existsById(id)) {
