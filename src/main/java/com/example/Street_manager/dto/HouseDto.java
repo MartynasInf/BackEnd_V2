@@ -15,4 +15,5 @@ public class HouseDto {
     private String houseNumber;
     private String streetName;
     private UserDetailsDto user;
+    private Double plotArea;
 }

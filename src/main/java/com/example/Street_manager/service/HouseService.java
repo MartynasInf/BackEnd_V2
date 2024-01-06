@@ -43,6 +43,7 @@ public class HouseService implements DataChecker<House> {
                 .houseNumber(house.getHouseNumber())
                 .streetName(house.getStreetName())
                 .user(mapToUserDetails(house.getUser()))
+                .plotArea(house.getPlotArea())
                 .build();
     }
 
@@ -65,6 +66,7 @@ public class HouseService implements DataChecker<House> {
                 .id(houseInfo.getId())
                 .streetName(houseInfo.getStreetName())
                 .houseNumber(houseInfo.getHouseNumber())
+                .plotArea(houseInfo.getPlotArea())
                 .build();
         houseRepository.save(house);
     }
@@ -73,6 +75,7 @@ public class HouseService implements DataChecker<House> {
         House house = House.builder()
                 .streetName(houseInfo.getStreetName())
                 .houseNumber(houseInfo.getHouseNumber())
+                .plotArea(houseInfo.getPlotArea())
                 .build();
         houseRepository.save(house);
     }

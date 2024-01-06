@@ -29,7 +29,7 @@ public class SecurityConfiguration {
                 .antMatchers("/auth/**")
                 .permitAll()
                 .antMatchers("/authorised/houses/admin/**", "/authorised/users/admin/**", "/authorised/payments/admin/**")
-                .hasAuthority("ADMIN")
+                .access("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
                 .antMatchers("/authorised/**")
                 .authenticated()
                 .and()
