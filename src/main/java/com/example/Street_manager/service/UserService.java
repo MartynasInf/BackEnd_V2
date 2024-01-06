@@ -76,6 +76,7 @@ public class UserService implements DataChecker<User> {
                     .enabled(request.getEnabled())
                     .bankAccount(request.getBankAccount())
                     .phoneNumber(request.getPhoneNumber())
+                    .role(Role.valueOf(request.getRole().toString()))
                     .build();
             if (request.getPassword() != null) {
                 user.setPassword(passwordEncoder.encode(request.getPassword()));

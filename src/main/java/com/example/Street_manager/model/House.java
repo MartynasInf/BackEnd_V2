@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.CascadeType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -33,6 +34,9 @@ public class House {
     @NotNull
     @NotBlank
     private String streetName;
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = false)
+    private Double plotArea;
 
     @OneToOne(mappedBy = "house")
     @JsonIgnore

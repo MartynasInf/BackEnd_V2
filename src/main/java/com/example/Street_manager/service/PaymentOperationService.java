@@ -5,7 +5,7 @@ import com.example.Street_manager.dto.HousePaymentDto;
 import com.example.Street_manager.dto.PaymentOperationDto;
 import com.example.Street_manager.dto.UserDetailsDto;
 import com.example.Street_manager.Interface.DataChecker;
-import com.example.Street_manager.enums.PaymentOperationStatus;
+import com.example.Street_manager.enums.OperationStatus;
 import com.example.Street_manager.exception.ResponseException;
 import com.example.Street_manager.model.House;
 import com.example.Street_manager.model.HousePayment;
@@ -16,8 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class PaymentOperationService implements DataChecker<PaymentOperation> {
                     .purpose(paymentOperationDto.getPurpose())
                     .dueDate(paymentOperationDto.getDueDate())
                     .totalSum(paymentOperationDto.getTotalSum())
-                    .operationStatus(PaymentOperationStatus.CREATED)
+                    .operationStatus(OperationStatus.CREATED)
                     .creator(paymentOperationDto.getCreator())
                     .creationDate(LocalDate.now())
                     .build();

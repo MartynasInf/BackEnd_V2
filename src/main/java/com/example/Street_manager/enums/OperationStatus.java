@@ -1,6 +1,6 @@
 package com.example.Street_manager.enums;
 
-public enum PaymentOperationStatus {
+public enum OperationStatus {
     CREATED,
     ACTIVATED,
     ARCHIVED

@@ -1,5 +1,6 @@
 package com.example.Street_manager.dto;
 
+import com.example.Street_manager.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class UserDetailsDto {
     private String phoneNumber;
     private String bankAccount;
     private Boolean enabled;
+    private Role role;
 }

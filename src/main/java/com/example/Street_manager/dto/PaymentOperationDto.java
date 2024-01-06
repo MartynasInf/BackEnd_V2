@@ -1,7 +1,7 @@
 package com.example.Street_manager.dto;
 
 
-import com.example.Street_manager.enums.PaymentOperationStatus;
+import com.example.Street_manager.enums.OperationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class PaymentOperationDto {
     private String purpose;
     private LocalDate dueDate;
     private Double totalSum;
-    private PaymentOperationStatus operationStatus;
+    private OperationStatus operationStatus;
     private String creator;
     private LocalDate creationDate;
 

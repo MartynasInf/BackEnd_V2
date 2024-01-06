@@ -1,25 +1,16 @@
 package com.example.Street_manager.model;
 
 import com.example.Street_manager.enums.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.CascadeType;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToOne;
-import javax.persistence.GenerationType;
-import javax.persistence.JoinColumn;
+
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,7 +25,6 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @NotNull
     @NotBlank
     private String firstName;
@@ -55,13 +45,20 @@ public class User implements UserDetails {
     private String bankAccount;
     @NotNull
     private Boolean enabled;
-
     @Enumerated(EnumType.STRING)
     private Role role;
-
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "house_id", referencedColumnName = "id")
     private House house;
+
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "user_voteAnswer",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "voteAnswer_id")
+    )
+    private List<VoteAnswer> voteAnswers;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

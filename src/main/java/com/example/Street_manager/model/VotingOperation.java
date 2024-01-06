@@ -5,16 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.CascadeType;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.DecimalMin;
+
+import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Entity;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,30 +18,32 @@ import java.util.List;
 @Data
 @Entity
 @Builder
-public class PaymentOperation {
-
+public class VotingOperation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @NotNull
     @NotBlank
-    private String purpose;
+    private String title;
+    @NotNull
+    @NotBlank
+    private String description;
     @NotNull
     @FutureOrPresent
-    private LocalDate dueDate;
+    private LocalDate finishDate;
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    private Double totalSum;
+    private Integer progress;
     @NotNull
     private OperationStatus operationStatus;
     @NotNull
     private String creator;
-    @NotNull
-    private LocalDate creationDate;
 
+    @OneToMany(mappedBy = "votingRequest", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private List<VoteAnswer> voteAnswers;
 
-    @OneToMany(mappedBy = "paymentRequest", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    private List<HousePayment> housePayments;
-
+    @ManyToMany
+    @JoinTable(name = "voting_users",
+            joinColumns = @JoinColumn(name = "votingRequest_id"),
+            inverseJoinColumns = @JoinColumn(name = "votingUser"))
+    private List<User> votingUsers;
 }
